@@ -1,0 +1,26 @@
+{
+  "version": "3.0-FINAL",
+  "packageId": "0x89d7551fbb773b3384f4a8349564a8049b2dde01ef44e8a3ac0cd7a090bc6f5f",
+  "configId": "0x4647b77f187d8f2668d275b1667bbb09c6bd0163f214be8d10e6d806367bee12",
+  "coinMetadataId": "0x262f9cc60edde9577ffcdfc1203b6432fd33997bc7c3aa07feb3dc7f5c52a1c5",
+  "upgradeCapId": "0x34b072a6e128072464f22f21f1857fcc286b8204f24aeb26ef9effba87802d46",
+  "network": "devnet",
+  "deployedAt": "2025-09-10T04:01:23Z",
+  "logoUrl": "https://raw.githubusercontent.com/btb-finance/BTBFrontend/refs/heads/main/public/images/btblogo.jpg",
+  "status": "PRODUCTION READY",
+  "features": [
+    "✅ Bonding curve token mechanics",
+    "✅ SUI backing reserves",
+    "✅ 0.1% fee structure (0.05% collector + 0.05% backing)",
+    "✅ Price safety (only increases)",
+    "✅ Token logo properly displayed",
+    "✅ Full mint/burn cycle tested",
+    "✅ Event emission working",
+    "✅ Upgradeable contract"
+  ],
+  "explorerLinks": {
+    "package": "https://suiscan.xyz/devnet/object/0x89d7551fbb773b3384f4a8349564a8049b2dde01ef44e8a3ac0cd7a090bc6f5f",
+    "coinMetadata": "https://suiscan.xyz/devnet/object/0x262f9cc60edde9577ffcdfc1203b6432fd33997bc7c3aa07feb3dc7f5c52a1c5",
+    "logoImage": "https://raw.githubusercontent.com/btb-finance/BTBFrontend/refs/heads/main/public/images/btblogo.jpg"
+  }
+}

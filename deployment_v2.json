@@ -1,0 +1,18 @@
+{
+  "version": "2.0",
+  "packageId": "0xa2a9ac3b7a2c837a084bf05dbdf72d29d1e0c13de0bde83f37e92b8682698e30",
+  "configId": "0x3946c7d5e071184deb5c962768e525120b924ff192e644378532d9695343ccc9",
+  "coinMetadataId": "0xf9637ae59d716ed8c17cc712ba39d5bac01bf324e579ed0a589e10553a011341",
+  "upgradeCapId": "0x807e5eeed9f8bdd956103c90966fdd6c45af7751d0014307bf8b5f50d2e48ada",
+  "network": "devnet",
+  "deployedAt": "2025-09-10T03:57:52Z",
+  "logoUrl": "https://github.com/btb-finance/BTBFrontend/blob/main/public/images/btblogo.jpg",
+  "changes": [
+    "Added BTB Finance logo URL to coin metadata",
+    "Token now displays logo in wallets and explorers"
+  ],
+  "previousVersion": {
+    "packageId": "0x4a41c98d92f1f1fea5e63aa0ea72b82a9f1063fcaf47eb5baf334c0fb5d108d2",
+    "configId": "0xd4b1700f60ca190c22b3dfa3131bf39ca37007b4e14e265cc82f49ab48bb165a"
+  }
+}

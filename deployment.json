@@ -1,0 +1,8 @@
+{
+  "packageId": "0x4a41c98d92f1f1fea5e63aa0ea72b82a9f1063fcaf47eb5baf334c0fb5d108d2",
+  "configId": "0xd4b1700f60ca190c22b3dfa3131bf39ca37007b4e14e265cc82f49ab48bb165a",
+  "network": "devnet",
+  "deployedAt": "2025-09-10T03:34:21Z",
+  "coinMetadataId": "0xb220eeeee2900a79a772579bb1035d68b1b8b95303284bd1ea277115c95ee37c",
+  "upgradeCapId": "0xad1dc1d4fc61269b1d34a2c6b25c18c2a523d149229495c47e50da6a36f7eae0"
+}
