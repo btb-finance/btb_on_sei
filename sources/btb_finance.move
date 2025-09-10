@@ -18,7 +18,6 @@ module btb_finance::btb_finance {
     use sui::coin::{Self, Coin, TreasuryCap};
     use sui::balance::{Self, Balance};
     use sui::sui::SUI;
-    use sui::tx_context::TxContext;
 
     /// Minimum trade amount to prevent spam (1000 MIST = 0.000001 SUI)
     const MIN_TRADE: u64 = 1000;
