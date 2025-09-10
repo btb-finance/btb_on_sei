@@ -2,8 +2,10 @@
 name = "btb_finance"
 version = "1.0.0"
 edition = "2024.beta"
+published-at = "0xb59be2568883e493182837b35c5ab6a1743b855dd01b4443cc15d6bd004cac99"
 
 [dependencies]
+Sui = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/sui-framework", rev = "framework/devnet" }
 
 [addresses]
 btb_finance = "0x0"
