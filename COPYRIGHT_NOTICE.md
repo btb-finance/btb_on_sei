@@ -58,14 +58,14 @@ This repository is protected under the Digital Millennium Copyright Act (DMCA). 
 
 If you discover unauthorized copying or use of BTB Finance code, please report it immediately to:
 
-**Email**: legal@btbfinance.com  
+**Email**: legal@btb.finance
 **Subject**: Copyright Violation Report
 
 ## LICENSING INQUIRIES
 
 For legitimate licensing inquiries or business partnerships, contact:
 
-**Email**: partnerships@btbfinance.com  
+**Email**: partnerships@btb.finance  
 **Subject**: Licensing Inquiry - BTB Finance Sui Contract
 
 ---

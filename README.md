@@ -193,11 +193,3 @@ The contract emits the following events:
 
 - `TokensMinted` - When BTB tokens are minted
 - `TokensBurned` - When BTB tokens are burned
-
-## License
-
-[Add your license here]
-
-## Contributing
-
-[Add contribution guidelines here]
