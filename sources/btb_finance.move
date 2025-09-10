@@ -18,18 +18,10 @@ module btb_finance::btb_finance {
     use sui::coin::{Self, Coin, TreasuryCap};
     use sui::balance::{Self, Balance};
     use sui::sui::SUI;
-    use sui::tx_context::{Self, TxContext};
-    use sui::object::{Self, UID};
-    use sui::transfer;
-    use sui::event;
-    use sui::url;
-    use std::option;
+    use sui::tx_context::TxContext;
 
     /// Minimum trade amount to prevent spam (1000 MIST = 0.000001 SUI)
     const MIN_TRADE: u64 = 1000;
-    
-    /// Fee rate denominator (0.1% = 1/1000)
-    const FEE_RATE_DENOMINATOR: u64 = 1000;
     
     /// Half of fee rate (0.05% = 1/2000)
     const HALF_FEE_RATE_DENOMINATOR: u64 = 2000;
@@ -51,7 +43,7 @@ module btb_finance::btb_finance {
 
     /// Configuration and state for the BTB Finance protocol
     public struct TokenConfig has key {
-        id: UID,
+        id: sui::object::UID,
         /// Treasury capability for minting/burning BTB tokens
         treasury_cap: TreasuryCap<BTB_FINANCE>,
         /// SUI backing reserves
@@ -114,26 +106,26 @@ module btb_finance::btb_finance {
             b"BTB",
             b"BTB Finance",
             b"Bonding curve token backed by SUI reserves",
-            option::some(url::new_unsafe_from_bytes(b"https://raw.githubusercontent.com/btb-finance/BTBFrontend/refs/heads/main/public/images/btblogo.jpg")), // BTB logo
+            std::option::some(sui::url::new_unsafe_from_bytes(b"https://raw.githubusercontent.com/btb-finance/BTBFrontend/refs/heads/main/public/images/btblogo.jpg")), // BTB logo
             ctx
         );
 
         // Share the coin metadata
-        transfer::public_freeze_object(metadata);
+        sui::transfer::public_freeze_object(metadata);
 
         // Create initial configuration (will be initialized properly via init_config)
         let config = TokenConfig {
-            id: object::new(ctx),
+            id: sui::object::new(ctx),
             treasury_cap,
             backing_balance: balance::zero(),
-            authority: tx_context::sender(ctx), // Set deployer as authority
+            authority: sui::tx_context::sender(ctx), // Set deployer as authority
             fee_collector: @0x0, // Will be set in init_config
             total_fees_collected: 0,
             last_price: INITIAL_PRICE,
         };
 
         // Share the configuration object
-        transfer::share_object(config);
+        sui::transfer::share_object(config);
     }
 
     /// Initialize the protocol configuration with fee collector
@@ -155,17 +147,17 @@ module btb_finance::btb_finance {
         new_fee_collector: address,
         ctx: &TxContext,
     ) {
-        assert!(config.authority == tx_context::sender(ctx), E_NOT_AUTHORIZED);
+        assert!(config.authority == sui::tx_context::sender(ctx), E_NOT_AUTHORIZED);
         assert!(new_fee_collector != @0x0, E_INVALID_FEE_COLLECTOR);
         
         let old_fee_collector = config.fee_collector;
         config.fee_collector = new_fee_collector;
 
         // Emit event for fee collector change
-        event::emit(FeeCollectorUpdated {
+        sui::event::emit(FeeCollectorUpdated {
             old_fee_collector,
             new_fee_collector,
-            authority: tx_context::sender(ctx),
+            authority: sui::tx_context::sender(ctx),
         });
     }
 
@@ -175,14 +167,14 @@ module btb_finance::btb_finance {
         new_authority: address,
         ctx: &TxContext,
     ) {
-        assert!(config.authority == tx_context::sender(ctx), E_NOT_AUTHORIZED);
+        assert!(config.authority == sui::tx_context::sender(ctx), E_NOT_AUTHORIZED);
         assert!(new_authority != @0x0, E_INVALID_FEE_COLLECTOR); // Reusing error code
         
         let old_authority = config.authority;
         config.authority = new_authority;
 
         // Emit event for authority transfer
-        event::emit(AuthorityTransferred {
+        sui::event::emit(AuthorityTransferred {
             old_authority,
             new_authority,
         });
@@ -230,11 +222,11 @@ module btb_finance::btb_finance {
         balance::join(&mut config.backing_balance, backing_fee_balance);
         
         // Send fee to collector
-        transfer::public_transfer(fee_coin, config.fee_collector);
+        sui::transfer::public_transfer(fee_coin, config.fee_collector);
         
         // Mint BTB tokens to user
         let btb_tokens = coin::mint(&mut config.treasury_cap, tokens_to_mint, ctx);
-        let user = tx_context::sender(ctx);
+        let user = sui::tx_context::sender(ctx);
         
         // Update state and perform safety check
         config.total_fees_collected = config.total_fees_collected + fee_to_collector;
@@ -255,7 +247,7 @@ module btb_finance::btb_finance {
         config.last_price = new_price;
 
         // Emit event
-        event::emit(TokensMinted {
+        sui::event::emit(TokensMinted {
             user,
             sui_amount,
             tokens_minted: tokens_to_mint,
@@ -265,7 +257,7 @@ module btb_finance::btb_finance {
         });
 
         // Transfer BTB tokens to user
-        transfer::public_transfer(btb_tokens, user);
+        sui::transfer::public_transfer(btb_tokens, user);
     }
 
     /// Burn BTB tokens to receive SUI from backing reserves
@@ -304,9 +296,9 @@ module btb_finance::btb_finance {
         let user_coin = coin::from_balance(user_balance, ctx);
         let fee_coin = coin::from_balance(fee_balance, ctx);
         
-        let user = tx_context::sender(ctx);
-        transfer::public_transfer(user_coin, user);
-        transfer::public_transfer(fee_coin, config.fee_collector);
+        let user = sui::tx_context::sender(ctx);
+        sui::transfer::public_transfer(user_coin, user);
+        sui::transfer::public_transfer(fee_coin, config.fee_collector);
         
         // Update state and perform safety check
         config.total_fees_collected = config.total_fees_collected + fee_to_collector;
@@ -327,7 +319,7 @@ module btb_finance::btb_finance {
         config.last_price = new_price;
 
         // Emit event
-        event::emit(TokensBurned {
+        sui::event::emit(TokensBurned {
             user,
             tokens_burned: token_amount,
             sui_returned: user_amount,
@@ -392,6 +384,104 @@ module btb_finance::btb_finance {
     /// Public accessor for contract authority
     public fun authority(config: &TokenConfig): address {
         config.authority
+    }
+
+    /// Calculate how much BTB tokens user would get for a given SUI amount (read-only)
+    public fun calculate_btb_for_sui(config: &TokenConfig, sui_amount: u64): u64 {
+        if (sui_amount < MIN_TRADE) {
+            return 0
+        };
+        
+        let current_supply = coin::total_supply(&config.treasury_cap);
+        let backing_balance_amount = balance::value(&config.backing_balance);
+        
+        // Calculate fee structure: 0.1% total
+        let fee_to_collector = sui_amount / HALF_FEE_RATE_DENOMINATOR; // 0.05%
+        let fee_to_backing = sui_amount / HALF_FEE_RATE_DENOMINATOR; // 0.05%
+        let net_sui_for_tokens = sui_amount - fee_to_collector - fee_to_backing;
+        
+        // Calculate tokens using bonding curve (same as mint function)
+        if (current_supply == 0) {
+            // Initial mint: 1000 BTB per SUI (using net amount)
+            net_sui_for_tokens * 1000
+        } else {
+            // Bonding curve: tokens = (net_sui * total_supply) / current_backing
+            if (backing_balance_amount == 0) {
+                0
+            } else {
+                ((net_sui_for_tokens as u128) * (current_supply as u128) / (backing_balance_amount as u128) as u64)
+            }
+        }
+    }
+
+    /// Calculate how much SUI user would get for burning a given amount of BTB tokens (read-only)
+    public fun calculate_sui_for_btb(config: &TokenConfig, token_amount: u64): u64 {
+        if (token_amount == 0) {
+            return 0
+        };
+        
+        let current_supply = coin::total_supply(&config.treasury_cap);
+        let backing_balance_amount = balance::value(&config.backing_balance);
+        
+        if (current_supply == 0 || backing_balance_amount == 0) {
+            return 0
+        };
+        
+        // Calculate SUI to return using bonding curve (same as burn function)
+        let sui_to_return = ((token_amount as u128) * (backing_balance_amount as u128) / (current_supply as u128) as u64);
+        
+        if (sui_to_return < MIN_TRADE) {
+            return 0
+        };
+        
+        // Calculate fee structure: 0.1% total
+        let fee_to_collector = sui_to_return / HALF_FEE_RATE_DENOMINATOR; // 0.05%
+        let fee_stays_in_backing = sui_to_return / HALF_FEE_RATE_DENOMINATOR; // 0.05%
+        let user_amount = sui_to_return - fee_to_collector - fee_stays_in_backing;
+        
+        user_amount
+    }
+
+    /// Get detailed quote for buying BTB tokens with SUI (read-only)
+    public fun get_buy_quote(config: &TokenConfig, sui_amount: u64): (u64, u64, u64, u64) {
+        if (sui_amount < MIN_TRADE) {
+            return (0, 0, 0, 0)
+        };
+        
+        let fee_to_collector = sui_amount / HALF_FEE_RATE_DENOMINATOR; // 0.05%
+        let fee_to_backing = sui_amount / HALF_FEE_RATE_DENOMINATOR; // 0.05%
+        let tokens_received = calculate_btb_for_sui(config, sui_amount);
+        
+        // Returns: (tokens_received, fee_to_collector, fee_to_backing, net_sui_used)
+        (tokens_received, fee_to_collector, fee_to_backing, sui_amount - fee_to_collector - fee_to_backing)
+    }
+
+    /// Get detailed quote for selling BTB tokens for SUI (read-only)
+    public fun get_sell_quote(config: &TokenConfig, token_amount: u64): (u64, u64, u64, u64) {
+        if (token_amount == 0) {
+            return (0, 0, 0, 0)
+        };
+        
+        let current_supply = coin::total_supply(&config.treasury_cap);
+        let backing_balance_amount = balance::value(&config.backing_balance);
+        
+        if (current_supply == 0 || backing_balance_amount == 0) {
+            return (0, 0, 0, 0)
+        };
+        
+        // Calculate SUI to return using bonding curve
+        let sui_to_return = ((token_amount as u128) * (backing_balance_amount as u128) / (current_supply as u128) as u64);
+        
+        if (sui_to_return < MIN_TRADE) {
+            return (0, 0, 0, 0)
+        };
+        
+        let fee_to_collector = sui_to_return / HALF_FEE_RATE_DENOMINATOR; // 0.05%
+        let fee_stays_in_backing = sui_to_return / HALF_FEE_RATE_DENOMINATOR; // 0.05%
+        let user_receives = sui_to_return - fee_to_collector - fee_stays_in_backing;
+        
+        // Returns: (sui_received, fee_to_collector, fee_stays_in_backing, gross_sui_value)
+        (user_receives, fee_to_collector, fee_stays_in_backing, sui_to_return)
     }
 
     #[test_only]
