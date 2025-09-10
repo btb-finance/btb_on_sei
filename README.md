@@ -1,6 +1,23 @@
 # BTB Finance - Sui Implementation
 
+**Copyright (c) 2025 BTB Finance. All Rights Reserved.**  
+**PROPRIETARY AND CONFIDENTIAL - DO NOT COPY**
+
 A bonding curve token implementation on Sui where users can mint BTB tokens by depositing SUI and burn BTB tokens to receive SUI back. The contract maintains SUI reserves as backing for the tokens.
+
+## ⚠️ IMPORTANT LEGAL NOTICE
+
+This code is proprietary and confidential. **Unauthorized copying, forking, modification, or distribution is strictly prohibited** and will result in legal action. This includes:
+
+- ❌ Creating forks or copies of this repository
+- ❌ Using this code in other projects  
+- ❌ Modifying or adapting this code
+- ❌ Commercial use without license
+- ❌ Reverse engineering the algorithms
+
+**Permitted**: Viewing for educational purposes and interacting with deployed contracts only.
+
+See `LICENSE` file for complete terms.
 
 ## Features
 

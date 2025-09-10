@@ -1,11 +1,18 @@
 /// BTB Finance - Sui Token with SUI Backing
 /// 
+/// Copyright (c) 2025 BTB Finance. All Rights Reserved.
+/// PROPRIETARY AND CONFIDENTIAL - DO NOT COPY, DISTRIBUTE, OR MODIFY
+/// 
 /// A bonding curve token implementation where:
 /// - Users send SUI to mint BTB tokens
 /// - Users burn BTB tokens to receive SUI back
 /// - Contract maintains SUI reserves as backing
 /// - Price follows bonding curve: tokens = (sui * supply) / backing
 /// - Fee structure: 0.1% total (0.05% to fee collector, 0.05% increases backing)
+/// 
+/// This code is protected by copyright and trade secrets. Unauthorized copying,
+/// distribution, modification, or use is strictly prohibited and will result in
+/// legal action. See LICENSE file for full terms.
 
 module btb_finance::btb_finance {
     use sui::coin::{Self, Coin, TreasuryCap};
