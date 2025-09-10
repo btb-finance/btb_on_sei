@@ -37,6 +37,7 @@ module btb_finance::btb_finance {
     const E_INVALID_TOKEN_AMOUNT: u64 = 4;
     const E_PRICE_CANNOT_DECREASE: u64 = 5;
     const E_INVALID_FEE_COLLECTOR: u64 = 6;
+    const E_NOT_AUTHORIZED: u64 = 7;
 
     /// The BTB token type (one-time witness)
     public struct BTB_FINANCE has drop {}
@@ -48,6 +49,8 @@ module btb_finance::btb_finance {
         treasury_cap: TreasuryCap<BTB_FINANCE>,
         /// SUI backing reserves
         backing_balance: Balance<SUI>,
+        /// Contract authority (deployer)
+        authority: address,
         /// Fee collector address
         fee_collector: address,
         /// Total fees collected
@@ -84,6 +87,17 @@ module btb_finance::btb_finance {
         new_price: u64,
     }
 
+    public struct FeeCollectorUpdated has copy, drop {
+        old_fee_collector: address,
+        new_fee_collector: address,
+        authority: address,
+    }
+
+    public struct AuthorityTransferred has copy, drop {
+        old_authority: address,
+        new_authority: address,
+    }
+
     /// Module initializer - creates the BTB token and initial configuration
     fun init(witness: BTB_FINANCE, ctx: &mut TxContext) {
         // Create the treasury cap and coin metadata
@@ -105,6 +119,7 @@ module btb_finance::btb_finance {
             id: object::new(ctx),
             treasury_cap,
             backing_balance: balance::zero(),
+            authority: tx_context::sender(ctx), // Set deployer as authority
             fee_collector: @0x0, // Will be set in init_config
             total_fees_collected: 0,
             last_price: INITIAL_PRICE,
@@ -125,6 +140,45 @@ module btb_finance::btb_finance {
         assert!(fee_collector != @0x0, E_INVALID_FEE_COLLECTOR);
         
         config.fee_collector = fee_collector;
+    }
+
+    /// Update the fee collector address (only callable by authority)
+    public entry fun set_fee_collector(
+        config: &mut TokenConfig,
+        new_fee_collector: address,
+        ctx: &TxContext,
+    ) {
+        assert!(config.authority == tx_context::sender(ctx), E_NOT_AUTHORIZED);
+        assert!(new_fee_collector != @0x0, E_INVALID_FEE_COLLECTOR);
+        
+        let old_fee_collector = config.fee_collector;
+        config.fee_collector = new_fee_collector;
+
+        // Emit event for fee collector change
+        event::emit(FeeCollectorUpdated {
+            old_fee_collector,
+            new_fee_collector,
+            authority: tx_context::sender(ctx),
+        });
+    }
+
+    /// Transfer authority to a new address (only callable by current authority)
+    public entry fun transfer_authority(
+        config: &mut TokenConfig,
+        new_authority: address,
+        ctx: &TxContext,
+    ) {
+        assert!(config.authority == tx_context::sender(ctx), E_NOT_AUTHORIZED);
+        assert!(new_authority != @0x0, E_INVALID_FEE_COLLECTOR); // Reusing error code
+        
+        let old_authority = config.authority;
+        config.authority = new_authority;
+
+        // Emit event for authority transfer
+        event::emit(AuthorityTransferred {
+            old_authority,
+            new_authority,
+        });
     }
 
     /// Mint BTB tokens by sending SUI to the backing reserves
@@ -326,6 +380,11 @@ module btb_finance::btb_finance {
     /// Public accessor for total fees collected
     public fun total_fees_collected(config: &TokenConfig): u64 {
         config.total_fees_collected
+    }
+
+    /// Public accessor for contract authority
+    public fun authority(config: &TokenConfig): address {
+        config.authority
     }
 
     #[test_only]
